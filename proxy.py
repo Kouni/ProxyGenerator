@@ -8,7 +8,11 @@
 3.  coming soon...
 '''
 
-from urllib.request import urlopen, Request, ProxyHandler, build_opener, install_opener
+from urllib.request import (urlopen,
+                            Request,
+                            ProxyHandler,
+                            build_opener,
+                            install_opener)
 from bs4 import BeautifulSoup
 import lxml
 # import re
@@ -65,25 +69,31 @@ def get_random_ip():
 def check_proxy():
     global conn_info
     conn_info = json.loads(conn_info)
-    proxy_info = (conn_info['IP_Address_td'] + ':' + conn_info['Port_td'])
+    proxy_info = (conn_info['IP_Address_td'] + ':' + str(conn_info['Port_td']))
 
     opener = build_opener(ProxyHandler({'http': proxy_info}))
     opener.addheaders = [('User-agent', 'Mozilla/5.0')]
     install_opener(opener)
-    with urlopen('http://ifconfig.co/ip', timeout=10) as f:
-        return(f.read().decode('UTF-8'))
+    try:
+        with urlopen('http://ifconfig.co/ip', timeout=10) as f:
+            return(f.read().decode('UTF-8') + ':' + conn_info['Port_td'])
+    except Exception as e:
+        flag = False
+        while flag is False:
+            with urlopen('http://ifconfig.co/ip', timeout=10) as f:
+                return(f.read().decode('UTF-8').replace("\n", "") + ':' + conn_info['Port_td'])
+
 
 if __name__ == '__main__':
-    if os.path.exists('proxy_list.json'):
-        pass
-    else:
+    if not os.path.exists('proxy_list.json') \
+            or time.time() - os.stat("proxy_list.json").st_mtime > 300:
         renew_list()
 
-    if time.time() - os.stat("proxy_list.json").st_mtime > 300:
-        renew_list()
+    try:
+        get_random_ip()
+    except Exception as e:
+        get_random_ip()
     else:
         pass
-
-    get_random_ip()
-    print("Return IP: " + check_proxy())
-    print(conn_info)
+    finally:
+        print(check_proxy(), flush=True)
