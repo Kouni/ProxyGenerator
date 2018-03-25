@@ -10,12 +10,11 @@
 
 from urllib.request import (urlopen,
                             Request,
-                            ProxyHandler,
                             build_opener,
+                            ProxyHandler,
                             install_opener)
 from bs4 import BeautifulSoup
 import lxml
-# import re
 import json
 import os
 import time
@@ -25,24 +24,36 @@ import random
 '''Get newest proxy list from free-proxy-list.net.
 And parsing list data to JSON format file(proxy_list.json)
 '''
-# Get proxy list information html.
 
 
-def renew_list():
+# Get proxy list and save to json file.
+def renew_proxy_info():
     req = Request("https://free-proxy-list.net/#list",
                   headers={'User-Agent': 'Mozilla/5.0'})
-    with urlopen(req, timeout=1) as n:
-        with open('cache.html', 'wt') as f:
-            f.write(n.read().decode('UTF-8'))
+    try:
+        n = urlopen(req, timeout=1)
+    except Exception as e:
+        print('##### URLOPEN ERROR #####')
+    else:
+        with n:
+            try:
+                with open('cache.html', 'wt') as f:
+                    f.write(n.read().decode('UTF-8'))
+            except Exception as e:
+                print('##### CACHE I/O ERROR #####')
+            else:
+                pass
+    finally:
+        n.close()
 
-    # Parsing proxy list to JSON file.
-    soup = BeautifulSoup(open("cache.html"), "lxml")
-    ips = []
-    # ipv4_pattern = re.compile('\d+\.\d+\.\d+\.\d+')
-    table_body = soup.find('tbody')
+    # Parsing proxy list from HTML to JSON file.
+    with open("cache.html") as c:
+        soup = BeautifulSoup(c, "lxml")
+        table_body = soup.find('tbody')
+        ips = []
 
-    for p_html_tr in table_body.find_all('tr'):
-        tds = p_html_tr.find_all('td')
+    for html_tr in table_body.find_all('tr'):
+        tds = html_tr.find_all('td')
         ips.append({'IP_Address_td': tds[0].string,
                     'Port_td': tds[1].string,
                     'Code_td': tds[2].string,
@@ -57,43 +68,46 @@ def renew_list():
 
 def get_random_ip():
     global conn_info
-    with open('proxy_list.json', 'rt') as f:
-        random_ip = random.choice(json.load(f))
-    conn_info = json.dumps(random_ip)
+    try:
+        with open('proxy_list.json', 'rt') as f:
+            conn_info = json.dumps(random.choice(json.load(f)))
+    except Exception as e:
+        print('proxy_list.json I/O error.')
+    else:
+        return(conn_info)
 
 
-'''Valid proxy
-'''
-
-
+# Valid proxy
 def check_proxy():
-    global conn_info
-    conn_info = json.loads(conn_info)
-    proxy_info = (conn_info['IP_Address_td'] + ':' + str(conn_info['Port_td']))
-
+    global proxy_info
+    connectinfo = json.loads(conn_info)
+    proxy_info = (connectinfo['IP_Address_td']) + \
+        ':' + (connectinfo['Port_td'])
     opener = build_opener(ProxyHandler({'http': proxy_info}))
     opener.addheaders = [('User-agent', 'Mozilla/5.0')]
     install_opener(opener)
     try:
-        with urlopen('http://ifconfig.co/ip', timeout=10) as f:
-            return(f.read().decode('UTF-8') + ':' + conn_info['Port_td'])
+        with urlopen('http://ifconfig.co/ip', timeout=5) as n:
+            result = (n.read().decode('UTF-8') + ':' +
+                      connectinfo['Port_td']).replace('\n', '')
     except Exception as e:
-        flag = False
-        while flag is False:
-            with urlopen('http://ifconfig.co/ip', timeout=10) as f:
-                return(f.read().decode('UTF-8').replace("\n", "") + ':' + conn_info['Port_td'])
+        return('proxy_invalid')
+    else:
+        return(result)
 
 
 if __name__ == '__main__':
+    # get_random_ip()
+    # connectinfo = json.loads(conn_info)
+    # print(connectinfo['IP_Address_td'])
+
     if not os.path.exists('proxy_list.json') \
             or time.time() - os.stat("proxy_list.json").st_mtime > 300:
-        renew_list()
-
-    try:
+        renew_proxy_info()
+    get_random_ip()
+    final_resule = check_proxy()
+    while (final_resule == 'proxy_invalid'):
+        # print('Faile: ', final_resule + ' ==> ' + proxy_info)
         get_random_ip()
-    except Exception as e:
-        get_random_ip()
-    else:
-        pass
-    finally:
-        print(check_proxy(), flush=True)
+        final_resule = check_proxy()
+    print(final_resule)
