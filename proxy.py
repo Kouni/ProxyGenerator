@@ -10,8 +10,8 @@
 
 from urllib.request import (urlopen,
                             Request,
-                            build_opener,
                             ProxyHandler,
+                            build_opener,
                             install_opener)
 from bs4 import BeautifulSoup
 import lxml
@@ -97,10 +97,6 @@ def check_proxy():
 
 
 if __name__ == '__main__':
-    # get_random_ip()
-    # connectinfo = json.loads(conn_info)
-    # print(connectinfo['IP_Address_td'])
-
     if not os.path.exists('proxy_list.json') \
             or time.time() - os.stat("proxy_list.json").st_mtime > 300:
         renew_proxy_info()
