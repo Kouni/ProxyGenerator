@@ -80,14 +80,16 @@ def get_random_ip():
 # Valid proxy
 def check_proxy():
     global proxy_info
+    global result_ip
     connectinfo = json.loads(conn_info)
     proxy_info = (connectinfo['IP_Address_td']) + \
         ':' + (connectinfo['Port_td'])
+    result_ip = connectinfo['IP_Address_td']
     opener = build_opener(ProxyHandler({'http': proxy_info}))
     opener.addheaders = [('User-agent', 'Mozilla/5.0')]
     install_opener(opener)
     try:
-        with urlopen('http://ifconfig.co/ip', timeout=5) as n:
+        with urlopen('http://ifconfig.co/ip', timeout=1) as n:
             result = (n.read().decode('UTF-8') + ':' +
                       connectinfo['Port_td']).replace('\n', '')
     except Exception as e:
@@ -103,7 +105,15 @@ if __name__ == '__main__':
     get_random_ip()
     final_resule = check_proxy()
     while (final_resule == 'proxy_invalid'):
-        # print('Faile: ', final_resule + ' ==> ' + proxy_info)
+        with open('proxy_list.json', 'rt', encoding='UTF-8') as json_data:
+            data = json.load(json_data)
+            for item in data:
+                if item['IP_Address_td'] == result_ip:
+                    data.remove(item)
+        with open('proxy_list.json', 'w+', encoding='UTF-8') as new_proxy_list:
+                new_proxy_list.write(json.dumps(data))
+
+        print('DELETE: ', '==> ' + proxy_info)
         get_random_ip()
         final_resule = check_proxy()
     print(final_resule)
