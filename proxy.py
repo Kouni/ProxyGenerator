@@ -2,10 +2,11 @@
 # -*- coding:UTF-8 -*-
 
 '''
-1.  Renew PROXY LIST if the data is older than five minutes.
+1.  Renew PROXY LIST if the data was older than 5 minutes.
     Then save to *proxy_list.json*.
-2.  Rendom get IP Information from proxy_list.json, then test it.
-3.  coming soon...
+2.  Rendom IP Information from proxy_list.json, then test it.
+3.  test all function.
+4.  coming soon...
 '''
 
 from urllib.request import (urlopen,
@@ -98,22 +99,44 @@ def check_proxy():
         return(result)
 
 
+def valid_all():
+    global conn_info
+    try:
+        with open('proxy_list.json', 'rt') as f:
+            result = json.load(f)
+            for ip in result:
+                print(ip)
+    except Exception as e:
+        print('proxy_list.json I/O error.')
+    else:
+        pass
+
+
 if __name__ == '__main__':
     if not os.path.exists('proxy_list.json') \
-            or time.time() - os.stat("proxy_list.json").st_mtime > 300:
+            or time.time() - os.stat("proxy_list.json").st_mtime > 300 \
+            or len(json.load(
+                open('proxy_list.json', 'rt', encoding='UTF-8'))) == 0:
         renew_proxy_info()
     get_random_ip()
     final_resule = check_proxy()
     while (final_resule == 'proxy_invalid'):
-        with open('proxy_list.json', 'rt', encoding='UTF-8') as json_data:
-            data = json.load(json_data)
-            for item in data:
-                if item['IP_Address_td'] == result_ip:
-                    data.remove(item)
-        with open('proxy_list.json', 'w+', encoding='UTF-8') as new_proxy_list:
+        if len(json.load(
+                open('proxy_list.json', 'rt', encoding='UTF-8'))) == 0:
+            renew_proxy_info()
+        else:
+            with open('proxy_list.json', 'rt', encoding='UTF-8') as json_data:
+                data = json.load(json_data)
+                for item in data:
+                    if item['IP_Address_td'] == result_ip:
+                        data.remove(item)
+            with open('proxy_list.json',
+                      'w+', encoding='UTF-8') as new_proxy_list:
                 new_proxy_list.write(json.dumps(data))
 
         print('DELETE: ', '==> ' + proxy_info)
         get_random_ip()
         final_resule = check_proxy()
-    print(final_resule)
+    with open('proxy_list.json', 'rt') as jsonfile:
+        print('Number of data records: ', len(json.load(jsonfile)))
+    print('Result: ', final_resule)
