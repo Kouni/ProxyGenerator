@@ -1,6 +1,10 @@
 # Amazon Q files
 .amazonq/
 
+# Project specific files
+cache.html
+data/proxies.json
+
 # Python
 __pycache__/
 *.py[cod]

@@ -3,8 +3,8 @@
 
 '''
 1.  Renew PROXY LIST if the data was older than 5 minutes.
-    Then save to *proxy_list.json*.
-2.  Rendom IP Information from proxy_list.json, then test it.
+    Then save to *data/proxies.json*.
+2.  Random IP Information from data/proxies.json, then test it.
 3.  test all function.
 4.  coming soon...
 '''
@@ -23,12 +23,15 @@ import random
 
 
 '''Get newest proxy list from free-proxy-list.net.
-And parsing list data to JSON format file(proxy_list.json)
+And parsing list data to JSON format file(data/proxies.json)
 '''
 
 
 # Get proxy list and save to json file.
 def renew_proxy_info():
+    # Ensure data directory exists
+    os.makedirs('data', exist_ok=True)
+    
     req = Request("https://free-proxy-list.net/#list",
                   headers={'User-Agent': 'Mozilla/5.0'})
     try:
@@ -63,17 +66,17 @@ def renew_proxy_info():
                     'Google_td': tds[5].string,
                     'Https_td': tds[6].string,
                     'Last_Checked_td': tds[7].string})
-    with open('proxy_list.json', 'wt')as f:
+    with open('data/proxies.json', 'wt')as f:
         f.write(json.dumps(ips))
 
 
 def get_random_ip():
     global conn_info
     try:
-        with open('proxy_list.json', 'rt') as f:
+        with open('data/proxies.json', 'rt') as f:
             conn_info = json.dumps(random.choice(json.load(f)))
     except Exception as e:
-        print('proxy_list.json I/O error.')
+        print('data/proxies.json I/O error.')
     else:
         return(conn_info)
 
@@ -102,41 +105,41 @@ def check_proxy():
 def valid_all():
     global conn_info
     try:
-        with open('proxy_list.json', 'rt') as f:
+        with open('data/proxies.json', 'rt') as f:
             result = json.load(f)
             for ip in result:
                 print(ip)
     except Exception as e:
-        print('proxy_list.json I/O error.')
+        print('data/proxies.json I/O error.')
     else:
         pass
 
 
 if __name__ == '__main__':
-    if not os.path.exists('proxy_list.json') \
-            or time.time() - os.stat("proxy_list.json").st_mtime > 300 \
+    if not os.path.exists('data/proxies.json') \
+            or time.time() - os.stat("data/proxies.json").st_mtime > 300 \
             or len(json.load(
-                open('proxy_list.json', 'rt', encoding='UTF-8'))) == 0:
+                open('data/proxies.json', 'rt', encoding='UTF-8'))) == 0:
         renew_proxy_info()
     get_random_ip()
     final_resule = check_proxy()
     while (final_resule == 'proxy_invalid'):
         if len(json.load(
-                open('proxy_list.json', 'rt', encoding='UTF-8'))) == 0:
+                open('data/proxies.json', 'rt', encoding='UTF-8'))) == 0:
             renew_proxy_info()
         else:
-            with open('proxy_list.json', 'rt', encoding='UTF-8') as json_data:
+            with open('data/proxies.json', 'rt', encoding='UTF-8') as json_data:
                 data = json.load(json_data)
                 for item in data:
                     if item['IP_Address_td'] == result_ip:
                         data.remove(item)
-            with open('proxy_list.json',
+            with open('data/proxies.json',
                       'w+', encoding='UTF-8') as new_proxy_list:
                 new_proxy_list.write(json.dumps(data))
 
         print('DELETE: ', '==> ' + proxy_info)
         get_random_ip()
         final_resule = check_proxy()
-    with open('proxy_list.json', 'rt') as jsonfile:
+    with open('data/proxies.json', 'rt') as jsonfile:
         print('Number of data records: ', len(json.load(jsonfile)))
     print('Result: ', final_resule)
