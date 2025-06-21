@@ -37,7 +37,12 @@ jobs:
     
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-dev
+      run: poetry install
+    
+    - name: Run tests
+      run: |
+        poetry run pytest -v
+        echo "All tests passed successfully"
     
     - name: Create data directory
       run: mkdir -p data
