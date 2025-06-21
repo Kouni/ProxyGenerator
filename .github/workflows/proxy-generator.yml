@@ -79,14 +79,12 @@ jobs:
         path: data/proxies.json
         retention-days: 7
     
-    - name: Commit and push if changed
+    - name: Check proxy generation result
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add data/proxies.json
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
+        if [ -f "data/proxies.json" ]; then
+          echo "✅ Proxy generation successful"
+          echo "Generated $(jq length data/proxies.json) proxies"
         else
-          git commit -m "chore: update proxy data - $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
+          echo "❌ Proxy generation failed"
+          exit 1
         fi

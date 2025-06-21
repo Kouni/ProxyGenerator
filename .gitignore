@@ -4,6 +4,7 @@
 # Project specific files
 cache.html
 cache/
+data/proxies.json
 CLAUDE.md
 
 # Python
