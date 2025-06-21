@@ -100,9 +100,8 @@ class TestMain(unittest.TestCase):
     
     @patch('proxygenerator.main.ProxyManager')
     @patch('proxygenerator.main.setup_logging')
-    @patch('proxygenerator.main.sys.exit')
     @patch('builtins.print')
-    def test_main_no_working_proxy(self, mock_print, mock_exit, mock_setup_logging, mock_manager_class):
+    def test_main_no_working_proxy(self, mock_print, mock_setup_logging, mock_manager_class):
         """Test main function when no working proxy is found."""
         # Setup mock manager
         mock_manager = Mock()
@@ -113,39 +112,37 @@ class TestMain(unittest.TestCase):
         mock_manager.file_handler.is_data_fresh.return_value = True
         mock_manager.find_working_proxy.return_value = None
         
-        main()
+        result = main()
         
-        # Verify exit was called with error code
-        mock_exit.assert_called_once_with(1)
+        # Verify return code is 1 (error)
+        self.assertEqual(result, 1)
         
         # Verify error message was printed
         mock_print.assert_any_call("No working proxy found")
     
     @patch('proxygenerator.main.ProxyManager')
     @patch('proxygenerator.main.setup_logging')
-    @patch('proxygenerator.main.sys.exit')
-    def test_main_keyboard_interrupt(self, mock_exit, mock_setup_logging, mock_manager_class):
+    def test_main_keyboard_interrupt(self, mock_setup_logging, mock_manager_class):
         """Test main function handles keyboard interrupt gracefully."""
         # Setup mock manager to raise KeyboardInterrupt
         mock_manager_class.side_effect = KeyboardInterrupt()
         
-        main()
+        result = main()
         
-        # Verify exit was called with success code
-        mock_exit.assert_called_once_with(0)
+        # Verify return code is 0 (success)
+        self.assertEqual(result, 0)
     
     @patch('proxygenerator.main.ProxyManager')
     @patch('proxygenerator.main.setup_logging')
-    @patch('proxygenerator.main.sys.exit')
-    def test_main_unexpected_error(self, mock_exit, mock_setup_logging, mock_manager_class):
+    def test_main_unexpected_error(self, mock_setup_logging, mock_manager_class):
         """Test main function handles unexpected errors."""
         # Setup mock manager to raise exception
         mock_manager_class.side_effect = Exception("Unexpected error")
         
-        main()
+        result = main()
         
-        # Verify exit was called with error code
-        mock_exit.assert_called_once_with(1)
+        # Verify return code is 1 (error)
+        self.assertEqual(result, 1)
     
     def test_main_logging_messages(self):
         """Test that appropriate log messages are generated."""
