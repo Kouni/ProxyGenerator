@@ -88,7 +88,7 @@ jobs:
           echo "✅ Proxy generation successful"
           echo "Generated $(jq length data/proxies.json) proxies"
           
-          git add data/proxies.json
+          git add -f data/proxies.json
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
