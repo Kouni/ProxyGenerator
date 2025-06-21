@@ -39,7 +39,7 @@ class TestProxyFetcher(unittest.TestCase):
     @patch('proxygenerator.core.proxy_fetcher.urlopen')
     def test_fetch_proxy_list_error_with_cache(self, mock_urlopen):
         """Test fetching with error but cache available."""
-        mock_urlopen.side_effect = Exception("Network error")
+        mock_urlopen.side_effect = ConnectionError("Network error")
         
         # Create cache file
         cache_file = f"{self.temp_dir}/proxies.html"

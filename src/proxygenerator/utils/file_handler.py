@@ -4,8 +4,11 @@
 """File handling utilities for proxy data management."""
 
 import json
+import logging
 import os
 import time
+
+logger = logging.getLogger(__name__)
 
 
 class FileHandler:
@@ -21,21 +24,31 @@ class FileHandler:
         try:
             with open(self.proxy_file, 'w', encoding='utf-8') as f:
                 json.dump(proxy_list, f, indent=2, ensure_ascii=False)
+            logger.info(f"Successfully saved {len(proxy_list)} proxies to {self.proxy_file}")
             return True
-        except Exception as e:
-            print(f'Error saving proxies: {e}')
+        except OSError as e:
+            logger.error(f'File I/O error saving proxies: {e}')
+            return False
+        except (TypeError, ValueError) as e:
+            logger.error(f'JSON serialization error: {e}')
             return False
     
     def load_proxies(self):
         """Load proxy list from JSON file."""
         try:
             if not os.path.exists(self.proxy_file):
+                logger.debug(f"Proxy file {self.proxy_file} does not exist")
                 return []
             
             with open(self.proxy_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            print(f'Error loading proxies: {e}')
+                proxies = json.load(f)
+                logger.debug(f"Loaded {len(proxies)} proxies from {self.proxy_file}")
+                return proxies
+        except OSError as e:
+            logger.error(f'File I/O error loading proxies: {e}')
+            return []
+        except json.JSONDecodeError as e:
+            logger.error(f'JSON decode error: {e}')
             return []
     
     def is_data_fresh(self, max_age_seconds=300):

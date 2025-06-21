@@ -3,9 +3,12 @@
 
 """Proxy fetcher module for retrieving proxy lists from external sources."""
 
+import logging
 import os
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
+
+logger = logging.getLogger(__name__)
 
 
 class ProxyFetcher:
@@ -31,36 +34,50 @@ class ProxyFetcher:
                 html_content = response.read().decode('UTF-8')
                 with open(cache_file, 'w', encoding='utf-8') as f:
                     f.write(html_content)
+                logger.info(f"Successfully fetched proxy list from {url}")
                 return html_content
-        except Exception as e:
-            print(f'Error fetching proxy list: {e}')
+        except (ConnectionError, TimeoutError) as e:
+            logger.warning(f'Network error fetching proxy list: {e}')
             if os.path.exists(cache_file):
+                logger.info("Using cached proxy list due to network error")
                 with open(cache_file, 'r', encoding='utf-8') as f:
                     return f.read()
+            raise
+        except UnicodeDecodeError as e:
+            logger.error(f'Failed to decode response content: {e}')
+            raise
+        except OSError as e:
+            logger.error(f'File I/O error: {e}')
             raise
     
     def parse_proxy_list(self, html_content):
         """Parse HTML content to extract proxy information."""
-        soup = BeautifulSoup(html_content, "lxml")
-        table_body = soup.find('tbody')
-        
-        if not table_body:
+        try:
+            soup = BeautifulSoup(html_content, "lxml")
+            table_body = soup.find('tbody')
+            
+            if not table_body:
+                logger.warning("No table body found in HTML content")
+                return []
+            
+            proxies = []
+            for row in table_body.find_all('tr'):
+                cells = row.find_all('td')
+                if len(cells) >= 8:
+                    proxy_info = {
+                        'IP_Address_td': cells[0].string,
+                        'Port_td': cells[1].string,
+                        'Code_td': cells[2].string,
+                        'Country_td': cells[3].string,
+                        'Anonymity_td': cells[4].string,
+                        'Google_td': cells[5].string,
+                        'Https_td': cells[6].string,
+                        'Last_Checked_td': cells[7].string
+                    }
+                    proxies.append(proxy_info)
+            
+            logger.info(f"Successfully parsed {len(proxies)} proxies from HTML")
+            return proxies
+        except Exception as e:
+            logger.error(f"Error parsing HTML content: {e}")
             return []
-        
-        proxies = []
-        for row in table_body.find_all('tr'):
-            cells = row.find_all('td')
-            if len(cells) >= 8:
-                proxy_info = {
-                    'IP_Address_td': cells[0].string,
-                    'Port_td': cells[1].string,
-                    'Code_td': cells[2].string,
-                    'Country_td': cells[3].string,
-                    'Anonymity_td': cells[4].string,
-                    'Google_td': cells[5].string,
-                    'Https_td': cells[6].string,
-                    'Last_Checked_td': cells[7].string
-                }
-                proxies.append(proxy_info)
-        
-        return proxies

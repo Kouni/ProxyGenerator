@@ -49,13 +49,13 @@ class TestProxyValidator(unittest.TestCase):
             'Port_td': '8080'
         }
         
-        mock_urlopen.side_effect = Exception("Connection timeout")
+        mock_urlopen.side_effect = ConnectionError("Connection timeout")
         
         result = self.validator.validate_proxy(proxy_info)
         
         self.assertFalse(result['valid'])
         self.assertEqual(result['proxy'], '1.1.1.1:8080')
-        self.assertEqual(result['error'], 'Connection timeout')
+        self.assertEqual(result['error'], 'Network error: Connection timeout')
         self.assertEqual(result['original_info'], proxy_info)
     
     def test_validate_proxy_list(self):

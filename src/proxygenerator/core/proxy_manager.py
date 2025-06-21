@@ -3,10 +3,13 @@
 
 """Main proxy management module."""
 
+import logging
 import random
 from .proxy_fetcher import ProxyFetcher
 from .proxy_validator import ProxyValidator
 from ..utils.file_handler import FileHandler
+
+logger = logging.getLogger(__name__)
 
 
 class ProxyManager:
@@ -20,22 +23,27 @@ class ProxyManager:
     def refresh_proxy_data(self):
         """Fetch and save fresh proxy data."""
         try:
+            logger.info("Starting proxy data refresh")
             html_content = self.fetcher.fetch_proxy_list()
             proxy_list = self.fetcher.parse_proxy_list(html_content)
             
             if proxy_list:
                 self.file_handler.save_proxies(proxy_list)
+                logger.info(f"Successfully refreshed proxy data with {len(proxy_list)} proxies")
                 return True
-            return False
+            else:
+                logger.warning("No proxies found during refresh")
+                return False
         except Exception as e:
-            print(f'Error refreshing proxy data: {e}')
+            logger.error(f'Unexpected error refreshing proxy data: {e}')
             return False
     
     def get_proxy_list(self, force_refresh=False):
         """Get proxy list, refreshing if necessary."""
         if force_refresh or not self.file_handler.is_data_fresh():
+            logger.info("Proxy data is stale or refresh forced, attempting refresh")
             if not self.refresh_proxy_data():
-                print('Failed to refresh proxy data, using cached data if available')
+                logger.warning('Failed to refresh proxy data, using cached data if available')
         
         return self.file_handler.load_proxies()
     
@@ -64,7 +72,7 @@ class ProxyManager:
                     proxy_list, proxy['IP_Address_td']
                 )
                 self.file_handler.save_proxies(proxy_list)
-                print(f"Removed invalid proxy: {result['proxy']}")
+                logger.info(f"Removed invalid proxy: {result['proxy']}")
                 attempts += 1
         
         return None
