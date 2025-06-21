@@ -140,16 +140,6 @@
     "Last_Checked_td": "4 secs ago"
   },
   {
-    "IP_Address_td": "186.207.148.71",
-    "Port_td": "8787",
-    "Code_td": "BR",
-    "Country_td": "Brazil",
-    "Anonymity_td": "elite proxy",
-    "Google_td": null,
-    "Https_td": "no",
-    "Last_Checked_td": "4 secs ago"
-  },
-  {
     "IP_Address_td": "213.189.137.132",
     "Port_td": "80",
     "Code_td": "CH",
@@ -866,16 +856,6 @@
     "Country_td": "Vietnam",
     "Anonymity_td": "elite proxy",
     "Google_td": "no",
-    "Https_td": "no",
-    "Last_Checked_td": "9 secs ago"
-  },
-  {
-    "IP_Address_td": "58.187.70.114",
-    "Port_td": "16000",
-    "Code_td": "VN",
-    "Country_td": "Vietnam",
-    "Anonymity_td": "elite proxy",
-    "Google_td": null,
     "Https_td": "no",
     "Last_Checked_td": "9 secs ago"
   },
@@ -2350,16 +2330,6 @@
     "Last_Checked_td": "40 mins ago"
   },
   {
-    "IP_Address_td": "82.209.251.53",
-    "Port_td": "45678",
-    "Code_td": "BY",
-    "Country_td": "Belarus",
-    "Anonymity_td": "elite proxy",
-    "Google_td": null,
-    "Https_td": "no",
-    "Last_Checked_td": "40 mins ago"
-  },
-  {
     "IP_Address_td": "116.103.25.152",
     "Port_td": "16000",
     "Code_td": "VN",
@@ -2540,16 +2510,6 @@
     "Last_Checked_td": "40 mins ago"
   },
   {
-    "IP_Address_td": "136.0.189.219",
-    "Port_td": "6946",
-    "Code_td": "US",
-    "Country_td": "United States",
-    "Anonymity_td": "transparent",
-    "Google_td": "no",
-    "Https_td": "no",
-    "Last_Checked_td": "40 mins ago"
-  },
-  {
     "IP_Address_td": "45.127.248.43",
     "Port_td": "5044",
     "Code_td": "US",
@@ -2652,16 +2612,6 @@
   {
     "IP_Address_td": "161.123.5.21",
     "Port_td": "5070",
-    "Code_td": "US",
-    "Country_td": "United States",
-    "Anonymity_td": "transparent",
-    "Google_td": "no",
-    "Https_td": "no",
-    "Last_Checked_td": "40 mins ago"
-  },
-  {
-    "IP_Address_td": "38.170.169.72",
-    "Port_td": "5313",
     "Code_td": "US",
     "Country_td": "United States",
     "Anonymity_td": "transparent",
