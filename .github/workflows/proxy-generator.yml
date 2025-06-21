@@ -1,5 +1,8 @@
 name: Proxy Generator
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Run every hour at minute 0
