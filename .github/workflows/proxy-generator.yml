@@ -1,0 +1,79 @@
+name: Proxy Generator
+
+on:
+  schedule:
+    # Run every hour at minute 0
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+
+jobs:
+  generate-proxies:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        installer-parallel: true
+    
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+    
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-dev
+    
+    - name: Create data directory
+      run: mkdir -p data
+    
+    - name: Run proxy generator
+      run: |
+        poetry run proxygenerator
+        echo "Proxy generation completed at $(date)"
+    
+    - name: Check generated data
+      run: |
+        if [ -f "data/proxies.json" ]; then
+          echo "Generated proxy data:"
+          echo "File size: $(du -h data/proxies.json | cut -f1)"
+          echo "Number of proxies: $(jq length data/proxies.json)"
+          echo "Sample proxies:"
+          jq -r '.[:3][] | "\(.IP_Address_td):\(.Port_td) (\(.Country_td))"' data/proxies.json
+        else
+          echo "No proxy data generated"
+        fi
+    
+    - name: Upload proxy data
+      uses: actions/upload-artifact@v3
+      with:
+        name: proxy-data-${{ github.run_number }}
+        path: data/proxies.json
+        retention-days: 7
+    
+    - name: Commit and push if changed
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/proxies.json
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "chore: update proxy data - $(date '+%Y-%m-%d %H:%M:%S')"
+          git push
+        fi
