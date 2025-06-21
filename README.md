@@ -2,6 +2,8 @@
 
 A Python application that fetches and validates proxy servers from free-proxy-list.net. This tool automatically retrieves proxy lists, validates their functionality, and provides working proxy servers for your applications.
 
+**✅ Test Status:** 22 tests passing | 82% code coverage
+
 ## Features
 
 - **Automatic Proxy Fetching**: Retrieves fresh proxy lists from free-proxy-list.net
@@ -13,8 +15,17 @@ A Python application that fetches and validates proxy servers from free-proxy-li
 
 ## Requirements
 
+### Runtime Dependencies
 - Python 3.13+
 - Poetry
+- beautifulsoup4 (HTML parsing)
+- lxml (XML/HTML processing)
+
+### Development Dependencies
+- pytest (testing framework)
+- pytest-cov (coverage reporting)
+- pylint (code linting)
+- isort (import sorting)
 
 ## Installation
 
@@ -93,15 +104,55 @@ The application uses the following default settings:
 ## Development
 
 ### Running Tests
+
+Execute all tests:
 ```bash
 poetry run pytest
 ```
 
-### Code Formatting
+Run tests with coverage report:
+```bash
+poetry run pytest --cov=src --cov-report=term
+```
+
+Run specific test files:
+```bash
+poetry run pytest tests/test_file_handler.py
+poetry run pytest tests/test_proxy_manager.py
+```
+
+Run tests with detailed coverage:
+```bash
+poetry run pytest --cov=src --cov-report=term-missing
+```
+
+### Test Structure
+
+The project includes comprehensive unit tests with 82% code coverage:
+
+- `tests/test_file_handler.py` - File operations and data persistence
+- `tests/test_proxy_fetcher.py` - Proxy list fetching and HTML parsing
+- `tests/test_proxy_validator.py` - Proxy validation and testing
+- `tests/test_proxy_manager.py` - Main management logic and integration
+
+### Code Quality
+
+Format code with isort:
 ```bash
 poetry run isort .
+```
+
+Lint code with pylint:
+```bash
 poetry run pylint src/
 ```
+
+### Testing Guidelines
+
+- All new features should include unit tests
+- Aim for >80% code coverage
+- Use mocking for external dependencies (network calls, file I/O)
+- Follow the existing test patterns and naming conventions
 
 ## License
 

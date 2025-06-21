@@ -18,7 +18,33 @@ lxml = "^5.4.0"
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.3.7"
 isort = "^6.0.1"
+pytest = "^8.4.1"
+pytest-cov = "^6.2.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = ["-v", "--tb=short", "--strict-markers"]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",  
+    "slow: Slow tests that require network access"
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError"
+]
