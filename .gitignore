@@ -4,6 +4,7 @@
 # Project specific files
 cache.html
 data/proxies.json
+CLAUDE.md
 
 # Python
 __pycache__/

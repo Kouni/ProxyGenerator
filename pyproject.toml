@@ -5,7 +5,10 @@ description = "A simple proxy generator script"
 authors = ["Kouni <kouni@example.com>"]
 license = "MIT"
 readme = "README.md"
-package-mode = false
+packages = [{include = "proxygenerator", from = "src"}]
+
+[tool.poetry.scripts]
+proxygenerator = "proxygenerator.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.13"
