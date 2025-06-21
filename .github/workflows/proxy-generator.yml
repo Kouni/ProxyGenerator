@@ -6,6 +6,12 @@ on:
     - cron: '0 * * * *'
   workflow_dispatch:
     # Allow manual triggering
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/proxy-generator.yml'
+      - 'src/**'
+      - 'pyproject.toml'
 
 jobs:
   generate-proxies:
