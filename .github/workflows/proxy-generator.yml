@@ -194,17 +194,13 @@ jobs:
             <h4>Python:</h4>
             <pre>import requests
 data = requests.get('https://kouni.github.io/ProxyGenerator/proxies.json').json()
-metadata = data['metadata']  # Generation info
-proxies = data['proxies']    # Proxy list</pre>
+metadata = data['metadata']
+proxies = data['proxies']</pre>
             
             <h4>JavaScript:</h4>
             <pre>fetch('https://kouni.github.io/ProxyGenerator/proxies.json')
   .then(response => response.json())
-  .then(data => {
-    console.log('Generated at:', data.metadata.generated_at);
-    console.log('Proxy count:', data.metadata.count);
-    console.log('Proxies:', data.proxies);
-  });</pre>
+  .then(data => console.log(data.proxies));</pre>
           </div>
         </body>
         </html>
