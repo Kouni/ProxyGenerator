@@ -43,7 +43,7 @@ class TestProxyManager(unittest.TestCase):
     def test_refresh_proxy_data_failure(self):
         """Test proxy data refresh failure."""
         with patch.object(self.manager.fetcher, 'fetch_proxy_list') as mock_fetch:
-            mock_fetch.side_effect = Exception("Network error")
+            mock_fetch.side_effect = ConnectionError("Network error")
             
             result = self.manager.refresh_proxy_data()
             

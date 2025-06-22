@@ -47,15 +47,15 @@ def main():
             print(f"Result: {result['result_ip']}:{result['proxy'].split(':')[1]}")
             logger.info("Successfully found working proxy")
             return 0
-        
+
         print("No working proxy found")
         logger.warning("No working proxy could be found")
         return 1
     except KeyboardInterrupt:
         logger.info("Program interrupted by user")
         return 0
-    except Exception as e:
-        logger.error("Unexpected error in main: %s", e)
+    except (ConnectionError, TimeoutError, ValueError) as e:
+        logger.error("Error in main: %s", e)
         return 1
 
 

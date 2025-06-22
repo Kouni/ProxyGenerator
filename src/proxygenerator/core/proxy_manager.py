@@ -31,11 +31,11 @@ class ProxyManager:
                 self.file_handler.save_proxies(proxy_list)
                 logger.info("Successfully refreshed proxy data with %d proxies", len(proxy_list))
                 return True
-            else:
-                logger.warning("No proxies found during refresh")
-                return False
-        except Exception as e:
-            logger.error("Unexpected error refreshing proxy data: %s", e)
+
+            logger.warning("No proxies found during refresh")
+            return False
+        except (ConnectionError, TimeoutError, ValueError) as e:
+            logger.error("Error refreshing proxy data: %s", e)
             return False
 
     def get_proxy_list(self, force_refresh=False):
@@ -67,13 +67,13 @@ class ProxyManager:
 
             if result['valid']:
                 return result
-            else:
-                proxy_list = self.file_handler.remove_proxy(
-                    proxy_list, proxy['IP_Address_td']
-                )
-                self.file_handler.save_proxies(proxy_list)
-                logger.info("Removed invalid proxy: %s", result['proxy'])
-                attempts += 1
+
+            proxy_list = self.file_handler.remove_proxy(
+                proxy_list, proxy['IP_Address_td']
+            )
+            self.file_handler.save_proxies(proxy_list)
+            logger.info("Removed invalid proxy: %s", result['proxy'])
+            attempts += 1
 
         return None
 

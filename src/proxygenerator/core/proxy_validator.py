@@ -3,7 +3,6 @@
 
 """Proxy validator module for testing proxy functionality."""
 
-import asyncio
 import ipaddress
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -26,29 +25,29 @@ class ProxyValidator:
         """Validate proxy IP address and port before testing."""
         ip_address = proxy_info.get('IP_Address_td')
         port = proxy_info.get('Port_td')
-        
+
         if not ip_address or not port:
             raise ValueError("Missing IP address or port")
-        
+
         # Validate IP address format
         try:
             parsed_ip = ipaddress.ip_address(ip_address)
         except ValueError as e:
             raise ValueError(f"Invalid IP address format: {ip_address}") from e
-        
+
         # Block private, loopback, and reserved addresses to prevent SSRF
         if parsed_ip.is_private or parsed_ip.is_loopback or parsed_ip.is_reserved:
             raise ValueError(f"Invalid IP address (private/loopback/reserved): {ip_address}")
-        
+
         # Validate port range
         try:
             port_num = int(port)
         except (ValueError, TypeError) as e:
             raise ValueError(f"Invalid port format: {port}") from e
-        
-        if not (1 <= port_num <= 65535):
+
+        if not 1 <= port_num <= 65535:
             raise ValueError(f"Port out of range (1-65535): {port}")
-        
+
         return ip_address, port_num
 
     def validate_proxy(self, proxy_info):
@@ -60,7 +59,8 @@ class ProxyValidator:
             logger.warning("Invalid proxy info: %s", e)
             return {
                 'valid': False,
-                'proxy': f"{proxy_info.get('IP_Address_td', 'unknown')}:{proxy_info.get('Port_td', 'unknown')}",
+                'proxy': (f"{proxy_info.get('IP_Address_td', 'unknown')}:"
+                         f"{proxy_info.get('Port_td', 'unknown')}"),
                 'error': f'Validation error: {str(e)}',
                 'original_info': proxy_info
             }
@@ -112,29 +112,30 @@ class ProxyValidator:
         """Validate a list of proxies concurrently for better performance."""
         if not proxy_list:
             return []
-        
+
         results = []
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Submit all validation tasks
             future_to_proxy = {
-                executor.submit(self.validate_proxy, proxy): proxy 
+                executor.submit(self.validate_proxy, proxy): proxy
                 for proxy in proxy_list
             }
-            
+
             # Collect results as they complete
             for future in as_completed(future_to_proxy):
                 try:
                     result = future.result()
                     results.append(result)
-                except Exception as e:
+                except (URLError, HTTPError, ConnectionError, TimeoutError) as e:
                     proxy = future_to_proxy[future]
-                    logger.error("Unexpected error validating proxy %s: %s", 
-                               f"{proxy.get('IP_Address_td', 'unknown')}:{proxy.get('Port_td', 'unknown')}", e)
+                    proxy_str = (f"{proxy.get('IP_Address_td', 'unknown')}:"
+                               f"{proxy.get('Port_td', 'unknown')}")
+                    logger.error("Network error validating proxy %s: %s", proxy_str, e)
                     results.append({
                         'valid': False,
-                        'proxy': f"{proxy.get('IP_Address_td', 'unknown')}:{proxy.get('Port_td', 'unknown')}",
-                        'error': f'Unexpected error: {str(e)}',
+                        'proxy': proxy_str,
+                        'error': f'Network error: {str(e)}',
                         'original_info': proxy
                     })
-        
+
         return results

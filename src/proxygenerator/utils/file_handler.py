@@ -37,7 +37,8 @@ class FileHandler:
 
             with open(self.proxy_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
-            logger.info("Successfully saved %d proxies with metadata to %s", len(proxy_list), self.proxy_file)
+            logger.info("Successfully saved %d proxies with metadata to %s",
+                       len(proxy_list), self.proxy_file)
             return True
         except OSError as e:
             logger.error("File I/O error saving proxies: %s", e)
@@ -60,12 +61,13 @@ class FileHandler:
                 if isinstance(data, dict) and 'proxies' in data:
                     proxies = data['proxies']
                     metadata = data.get('metadata', {})
-                    logger.debug("Loaded %d proxies with metadata from %s", len(proxies), self.proxy_file)
+                    logger.debug("Loaded %d proxies with metadata from %s",
+                                len(proxies), self.proxy_file)
                     logger.debug("Data generated at: %s", metadata.get('generated_at', 'unknown'))
                 # Handle legacy format (list of proxies)
                 elif isinstance(data, list):
                     proxies = data
-                    logger.debug("Loaded %d proxies (legacy format) from %s", 
+                    logger.debug("Loaded %d proxies (legacy format) from %s",
                                 len(proxies), self.proxy_file)
                 else:
                     logger.warning("Unknown data format in %s", self.proxy_file)

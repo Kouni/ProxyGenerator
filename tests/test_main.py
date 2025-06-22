@@ -136,7 +136,7 @@ class TestMain(unittest.TestCase):
     def test_main_unexpected_error(self, mock_setup_logging, mock_manager_class):
         """Test main function handles unexpected errors."""
         # Setup mock manager to raise exception
-        mock_manager_class.side_effect = Exception("Unexpected error")
+        mock_manager_class.side_effect = ConnectionError("Unexpected error")
         
         result = main()
         

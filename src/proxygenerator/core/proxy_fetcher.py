@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class ProxyFetcher:
     """Handles fetching proxy lists from external sources."""
-    
+
     # Security: Whitelist of trusted proxy sources
     TRUSTED_HOSTS = {
         'free-proxy-list.net',
@@ -31,20 +31,20 @@ class ProxyFetcher:
         """Ensure cache and data directories exist."""
         os.makedirs(self.cache_dir, exist_ok=True)
         os.makedirs(self.data_dir, exist_ok=True)
-    
+
     def _validate_url(self, url):
         """Validate URL against trusted hosts to prevent SSRF attacks."""
         try:
             parsed = urlparse(url)
             if not parsed.scheme or not parsed.hostname:
                 raise ValueError("Invalid URL format")
-            
+
             if parsed.scheme not in ('http', 'https'):
                 raise ValueError("Only HTTP/HTTPS URLs are allowed")
-            
+
             if parsed.hostname not in self.TRUSTED_HOSTS:
                 raise ValueError(f"Untrusted host: {parsed.hostname}")
-            
+
             return True
         except (AttributeError, TypeError) as e:
             logger.error("URL parsing error for %s: %s", url, e)
@@ -54,7 +54,6 @@ class ProxyFetcher:
         """Fetch proxy list from the specified URL."""
         # Security: Validate URL before making request
         self._validate_url(url)
-        
         req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         cache_file = os.path.join(self.cache_dir, 'proxies.html')
 
