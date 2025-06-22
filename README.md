@@ -4,7 +4,7 @@ Secure HTTP proxy fetcher with automated validation, concurrent processing, and 
 
 ## Features
 
-- **Security-First**: HTTPS validation with SSL certificate verification and SSRF protection
+- **Security-First**: HTTP validation with comprehensive input validation and SSRF protection
 - **Input Validation**: IP address and port range validation with private/loopback filtering
 - **Concurrent Processing**: Multi-threaded proxy validation for improved performance
 - **Automated Refresh**: GitHub Actions scheduled execution every hour
@@ -35,7 +35,7 @@ proxies = data['proxies']    # List of proxy objects
 ## Security Features
 
 - **SSRF Protection**: Trusted host whitelist prevents server-side request forgery
-- **SSL/TLS Validation**: HTTPS-only testing with certificate verification
+- **Protocol Validation**: HTTP testing optimized for proxy compatibility
 - **Input Sanitization**: IP address format validation and private network filtering
 - **Dependency Scanning**: Automated security vulnerability checks in CI/CD
 
@@ -49,7 +49,7 @@ proxies = data['proxies']    # List of proxy objects
 ## Implementation Details
 
 - **Source**: free-proxy-list.net (whitelisted for security)
-- **Validation**: 5s timeout with HTTPS IP verification
+- **Validation**: 5s timeout with HTTP IP verification for broad compatibility
 - **Refresh**: GitHub Actions hourly with security scanning
 - **Format**: JSON with metadata and generation timestamps
 - **Performance**: Concurrent validation with configurable worker threads
