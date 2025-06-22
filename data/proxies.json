@@ -1010,16 +1010,6 @@
     "Last_Checked_td": "1 min ago"
   },
   {
-    "IP_Address_td": "107.172.156.160",
-    "Port_td": "5808",
-    "Code_td": "US",
-    "Country_td": "United States",
-    "Anonymity_td": "transparent",
-    "Google_td": "no",
-    "Https_td": "no",
-    "Last_Checked_td": "1 min ago"
-  },
-  {
     "IP_Address_td": "45.41.169.31",
     "Port_td": "6692",
     "Code_td": "US",
@@ -1138,26 +1128,6 @@
     "Google_td": "no",
     "Https_td": "no",
     "Last_Checked_td": "9 mins ago"
-  },
-  {
-    "IP_Address_td": "4.149.210.210",
-    "Port_td": "3128",
-    "Code_td": "US",
-    "Country_td": "United States",
-    "Anonymity_td": "anonymous",
-    "Google_td": null,
-    "Https_td": "no",
-    "Last_Checked_td": "10 mins ago"
-  },
-  {
-    "IP_Address_td": "203.74.125.18",
-    "Port_td": "8888",
-    "Code_td": "TW",
-    "Country_td": "Taiwan",
-    "Anonymity_td": "anonymous",
-    "Google_td": null,
-    "Https_td": "no",
-    "Last_Checked_td": "10 mins ago"
   },
   {
     "IP_Address_td": "92.67.186.210",
@@ -1480,16 +1450,6 @@
     "Last_Checked_td": "11 mins ago"
   },
   {
-    "IP_Address_td": "123.58.199.232",
-    "Port_td": "8168",
-    "Code_td": "VN",
-    "Country_td": "Vietnam",
-    "Anonymity_td": "anonymous",
-    "Google_td": "no",
-    "Https_td": "no",
-    "Last_Checked_td": "11 mins ago"
-  },
-  {
     "IP_Address_td": "8.213.195.191",
     "Port_td": "9191",
     "Code_td": "TH",
@@ -1547,16 +1507,6 @@
     "Anonymity_td": "elite proxy",
     "Google_td": "no",
     "Https_td": "no",
-    "Last_Checked_td": "11 mins ago"
-  },
-  {
-    "IP_Address_td": "3.101.76.84",
-    "Port_td": "18242",
-    "Code_td": "US",
-    "Country_td": "United States",
-    "Anonymity_td": "elite proxy",
-    "Google_td": "no",
-    "Https_td": "yes",
     "Last_Checked_td": "11 mins ago"
   },
   {
