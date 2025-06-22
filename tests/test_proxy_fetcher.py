@@ -5,7 +5,7 @@
 
 import tempfile
 import unittest
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, patch
 
 from proxygenerator.core.proxy_fetcher import ProxyFetcher
 

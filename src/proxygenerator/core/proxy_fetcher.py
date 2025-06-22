@@ -13,53 +13,53 @@ logger = logging.getLogger(__name__)
 
 class ProxyFetcher:
     """Handles fetching proxy lists from external sources."""
-    
+
     def __init__(self, cache_dir='cache', data_dir='data'):
         self.cache_dir = cache_dir
         self.data_dir = data_dir
         self._ensure_directories()
-    
+
     def _ensure_directories(self):
         """Ensure cache and data directories exist."""
         os.makedirs(self.cache_dir, exist_ok=True)
         os.makedirs(self.data_dir, exist_ok=True)
-    
+
     def fetch_proxy_list(self, url="https://free-proxy-list.net/#list"):
         """Fetch proxy list from the specified URL."""
         req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         cache_file = os.path.join(self.cache_dir, 'proxies.html')
-        
+
         try:
             with urlopen(req, timeout=10) as response:
                 html_content = response.read().decode('UTF-8')
                 with open(cache_file, 'w', encoding='utf-8') as f:
                     f.write(html_content)
-                logger.info(f"Successfully fetched proxy list from {url}")
+                logger.info("Successfully fetched proxy list from %s", url)
                 return html_content
         except (ConnectionError, TimeoutError) as e:
-            logger.warning(f'Network error fetching proxy list: {e}')
+            logger.warning("Network error fetching proxy list: %s", e)
             if os.path.exists(cache_file):
                 logger.info("Using cached proxy list due to network error")
                 with open(cache_file, 'r', encoding='utf-8') as f:
                     return f.read()
             raise
         except UnicodeDecodeError as e:
-            logger.error(f'Failed to decode response content: {e}')
+            logger.error("Failed to decode response content: %s", e)
             raise
         except OSError as e:
-            logger.error(f'File I/O error: {e}')
+            logger.error("File I/O error: %s", e)
             raise
-    
+
     def parse_proxy_list(self, html_content):
         """Parse HTML content to extract proxy information."""
         try:
             soup = BeautifulSoup(html_content, "lxml")
             table_body = soup.find('tbody')
-            
+
             if not table_body:
                 logger.warning("No table body found in HTML content")
                 return []
-            
+
             proxies = []
             for row in table_body.find_all('tr'):
                 cells = row.find_all('td')
@@ -75,9 +75,9 @@ class ProxyFetcher:
                         'Last_Checked_td': cells[7].string
                     }
                     proxies.append(proxy_info)
-            
-            logger.info(f"Successfully parsed {len(proxies)} proxies from HTML")
+
+            logger.info("Successfully parsed %d proxies from HTML", len(proxies))
             return proxies
         except Exception as e:
-            logger.error(f"Error parsing HTML content: {e}")
+            logger.error("Error parsing HTML content: %s", e)
             return []

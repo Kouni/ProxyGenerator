@@ -7,7 +7,6 @@ import logging
 import sys
 import unittest
 from unittest.mock import Mock, patch, call
-from io import StringIO
 
 from proxygenerator.main import main, setup_logging
 
@@ -171,7 +170,7 @@ class TestMain(unittest.TestCase):
             main()
             
             # Verify logger calls
-            mock_logger.info.assert_any_call("Current data stats: {'exists': True, 'count': 100, 'size': 1000, 'modified': 1234567890}")
+            mock_logger.info.assert_any_call("Current data stats: %s", {'exists': True, 'count': 100, 'size': 1000, 'modified': 1234567890})
             mock_logger.info.assert_any_call("Successfully found working proxy")
 
 
