@@ -73,11 +73,25 @@ jobs:
         if [ -f "data/proxies.json" ]; then
           echo "Generated proxy data:"
           echo "File size: $(du -h data/proxies.json | cut -f1)"
-          COUNT=$(jq length data/proxies.json)
-          echo "Number of proxies: $COUNT"
-          echo "count=$COUNT" >> $GITHUB_OUTPUT
-          echo "Sample proxies:"
-          jq -r '.[:3][] | "\(.IP_Address_td):\(.Port_td) (\(.Country_td))"' data/proxies.json
+          
+          # Check if new format with metadata exists
+          if jq -e '.metadata' data/proxies.json > /dev/null 2>&1; then
+            # New format with metadata
+            COUNT=$(jq '.metadata.count' data/proxies.json)
+            GENERATED_AT=$(jq -r '.metadata.generated_at' data/proxies.json)
+            echo "Number of proxies: $COUNT"
+            echo "Generated at: $GENERATED_AT"
+            echo "count=$COUNT" >> $GITHUB_OUTPUT
+            echo "Sample proxies:"
+            jq -r '.proxies[:3][] | "\(.IP_Address_td):\(.Port_td) (\(.Country_td))"' data/proxies.json
+          else
+            # Legacy format (array)
+            COUNT=$(jq 'length' data/proxies.json)
+            echo "Number of proxies: $COUNT"
+            echo "count=$COUNT" >> $GITHUB_OUTPUT
+            echo "Sample proxies:"
+            jq -r '.[:3][] | "\(.IP_Address_td):\(.Port_td) (\(.Country_td))"' data/proxies.json
+          fi
         else
           echo "No proxy data generated"
           exit 1
