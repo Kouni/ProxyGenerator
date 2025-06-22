@@ -21,6 +21,8 @@ on:
 jobs:
   generate-proxies:
     runs-on: ubuntu-latest
+    outputs:
+      proxy-count: ${{ steps.count.outputs.count }}
     
     steps:
     - name: Checkout code
@@ -66,15 +68,19 @@ jobs:
         echo "Proxy generation completed at $(date)"
     
     - name: Check generated data
+      id: count
       run: |
         if [ -f "data/proxies.json" ]; then
           echo "Generated proxy data:"
           echo "File size: $(du -h data/proxies.json | cut -f1)"
-          echo "Number of proxies: $(jq length data/proxies.json)"
+          COUNT=$(jq length data/proxies.json)
+          echo "Number of proxies: $COUNT"
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
           echo "Sample proxies:"
           jq -r '.[:3][] | "\(.IP_Address_td):\(.Port_td) (\(.Country_td))"' data/proxies.json
         else
           echo "No proxy data generated"
+          exit 1
         fi
     
     - name: Upload proxy data
@@ -83,6 +89,20 @@ jobs:
         name: proxy-data-${{ github.run_number }}
         path: data/proxies.json
         retention-days: 7
+
+  deploy-pages:
+    needs: generate-proxies
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - name: Download proxy data
+      uses: actions/download-artifact@v4
+      with:
+        name: proxy-data-${{ github.run_number }}
+        path: data
     
     - name: Prepare GitHub Pages
       run: |
@@ -90,20 +110,27 @@ jobs:
         cp data/proxies.json _site/
         
         # Create index page
-        cat > _site/index.html << EOF
+        cat > _site/index.html << 'EOF'
         <!DOCTYPE html>
         <html>
         <head>
           <title>ProxyGenerator Data</title>
           <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .info { background: #f5f5f5; padding: 20px; border-radius: 5px; }
+          </style>
         </head>
         <body>
           <h1>ProxyGenerator</h1>
-          <p>Fresh proxy data updated every hour</p>
-          <p>Last updated: $(date)</p>
-          <p>Total proxies: $(jq length data/proxies.json)</p>
+          <div class="info">
+            <p>Fresh proxy data updated every hour</p>
+            <p>Last updated: $(date)</p>
+            <p>Total proxies: ${{ needs.generate-proxies.outputs.proxy-count }}</p>
+          </div>
+          <h2>Download</h2>
           <ul>
-            <li><a href="proxies.json">Download proxies.json</a></li>
+            <li><a href="proxies.json">proxies.json</a> - Raw proxy data</li>
           </ul>
         </body>
         </html>
