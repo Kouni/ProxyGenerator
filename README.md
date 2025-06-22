@@ -63,7 +63,8 @@ poetry install
 # Run tests with coverage
 poetry run pytest --cov=src tests/
 
-# Security scan
+# Security scan (requires SAFETY_API_KEY environment variable)
+export SAFETY_API_KEY=your_api_key
 poetry run safety scan
 
 # Code quality

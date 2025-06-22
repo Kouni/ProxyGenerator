@@ -53,6 +53,8 @@ jobs:
       run: poetry install
     
     - name: Run security scan
+      env:
+        SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
       run: |
         poetry run safety scan
         echo "Security scan completed successfully"
