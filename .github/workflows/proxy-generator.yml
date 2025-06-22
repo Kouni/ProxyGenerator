@@ -1,7 +1,9 @@
 name: Proxy Generator
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 on:
   schedule:
@@ -82,24 +84,39 @@ jobs:
         path: data/proxies.json
         retention-days: 7
     
-    - name: Commit and push generated data
+    - name: Prepare GitHub Pages
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        mkdir -p _site
+        cp data/proxies.json _site/
         
-        if [ -f "data/proxies.json" ]; then
-          echo "✅ Proxy generation successful"
-          echo "Generated $(jq length data/proxies.json) proxies"
-          
-          git add -f data/proxies.json
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: update proxy data - $(date '+%Y-%m-%d %H:%M:%S UTC')"
-            git push
-            echo "✅ Proxy data committed and pushed"
-          fi
-        else
-          echo "❌ Proxy generation failed"
-          exit 1
-        fi
+        # Create index page
+        cat > _site/index.html << EOF
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>ProxyGenerator Data</title>
+          <meta charset="utf-8">
+        </head>
+        <body>
+          <h1>ProxyGenerator</h1>
+          <p>Fresh proxy data updated every hour</p>
+          <p>Last updated: $(date)</p>
+          <p>Total proxies: $(jq length data/proxies.json)</p>
+          <ul>
+            <li><a href="proxies.json">Download proxies.json</a></li>
+          </ul>
+        </body>
+        </html>
+        EOF
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: _site
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

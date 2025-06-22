@@ -9,15 +9,17 @@ poetry install
 poetry run proxygenerator
 ```
 
-Fresh proxy data: [`data/proxies.json`](data/proxies.json)
+Fresh proxy data: [Download JSON](https://kouni.github.io/ProxyGenerator/proxies.json)
 
 ## Data Access
 
-Direct JSON consumption:
-```python
-import json
-with open('data/proxies.json') as f:
-    proxies = json.load(f)
+```bash
+# Direct download
+curl -O https://kouni.github.io/ProxyGenerator/proxies.json
+
+# Use in Python
+import requests
+proxies = requests.get('https://kouni.github.io/ProxyGenerator/proxies.json').json()
 # Format: [{'IP_Address_td': '1.1.1.1', 'Port_td': '8080', ...}]
 ```
 
