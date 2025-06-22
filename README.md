@@ -68,6 +68,8 @@ poetry run pytest --cov=src tests/
 export SAFETY_API_KEY=your_api_key
 poetry run safety scan
 
+# Note: In CI/CD, the workflow automatically handles interactive prompts
+
 # Code quality check (achieves 10/10 score)
 poetry run pylint src/
 
