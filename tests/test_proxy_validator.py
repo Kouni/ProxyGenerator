@@ -5,6 +5,7 @@
 
 import unittest
 from unittest.mock import Mock, patch
+import ipaddress
 
 from proxygenerator.core.proxy_validator import ProxyValidator
 
@@ -77,6 +78,63 @@ class TestProxyValidator(unittest.TestCase):
             self.assertTrue(results[0]['valid'])
             self.assertFalse(results[1]['valid'])
             self.assertEqual(mock_validate.call_count, 2)
+    
+    def test_validate_proxy_info_valid(self):
+        """Test valid proxy info validation."""
+        proxy_info = {
+            'IP_Address_td': '8.8.8.8',
+            'Port_td': '8080'
+        }
+        
+        ip, port = self.validator._validate_proxy_info(proxy_info)
+        self.assertEqual(ip, '8.8.8.8')
+        self.assertEqual(port, 8080)
+    
+    def test_validate_proxy_info_invalid_ip(self):
+        """Test invalid IP address validation."""
+        proxy_info = {
+            'IP_Address_td': '192.168.1.1',  # Private IP
+            'Port_td': '8080'
+        }
+        
+        with self.assertRaises(ValueError) as context:
+            self.validator._validate_proxy_info(proxy_info)
+        self.assertIn("private/loopback/reserved", str(context.exception))
+    
+    def test_validate_proxy_info_invalid_port(self):
+        """Test invalid port validation."""
+        proxy_info = {
+            'IP_Address_td': '8.8.8.8',
+            'Port_td': '99999'  # Port out of range
+        }
+        
+        with self.assertRaises(ValueError) as context:
+            self.validator._validate_proxy_info(proxy_info)
+        self.assertIn("Port out of range", str(context.exception))
+    
+    def test_validate_proxy_info_missing_data(self):
+        """Test missing IP or port validation."""
+        proxy_info = {
+            'IP_Address_td': '8.8.8.8'
+            # Missing Port_td
+        }
+        
+        with self.assertRaises(ValueError) as context:
+            self.validator._validate_proxy_info(proxy_info)
+        self.assertIn("Missing IP address or port", str(context.exception))
+    
+    def test_validate_proxy_with_invalid_info(self):
+        """Test proxy validation with invalid info returns proper error."""
+        proxy_info = {
+            'IP_Address_td': '127.0.0.1',  # Loopback
+            'Port_td': '8080'
+        }
+        
+        result = self.validator.validate_proxy(proxy_info)
+        
+        self.assertFalse(result['valid'])
+        self.assertIn('Validation error', result['error'])
+        self.assertEqual(result['original_info'], proxy_info)
 
 
 if __name__ == '__main__':

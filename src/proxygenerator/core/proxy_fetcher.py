@@ -5,7 +5,9 @@
 
 import logging
 import os
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
+from urllib.error import URLError
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
@@ -13,6 +15,12 @@ logger = logging.getLogger(__name__)
 
 class ProxyFetcher:
     """Handles fetching proxy lists from external sources."""
+    
+    # Security: Whitelist of trusted proxy sources
+    TRUSTED_HOSTS = {
+        'free-proxy-list.net',
+        'www.free-proxy-list.net'
+    }
 
     def __init__(self, cache_dir='cache', data_dir='data'):
         self.cache_dir = cache_dir
@@ -23,9 +31,30 @@ class ProxyFetcher:
         """Ensure cache and data directories exist."""
         os.makedirs(self.cache_dir, exist_ok=True)
         os.makedirs(self.data_dir, exist_ok=True)
+    
+    def _validate_url(self, url):
+        """Validate URL against trusted hosts to prevent SSRF attacks."""
+        try:
+            parsed = urlparse(url)
+            if not parsed.scheme or not parsed.hostname:
+                raise ValueError("Invalid URL format")
+            
+            if parsed.scheme not in ('http', 'https'):
+                raise ValueError("Only HTTP/HTTPS URLs are allowed")
+            
+            if parsed.hostname not in self.TRUSTED_HOSTS:
+                raise ValueError(f"Untrusted host: {parsed.hostname}")
+            
+            return True
+        except (AttributeError, TypeError) as e:
+            logger.error("URL parsing error for %s: %s", url, e)
+            raise ValueError(f"Invalid URL format: {url}") from e
 
     def fetch_proxy_list(self, url="https://free-proxy-list.net/#list"):
         """Fetch proxy list from the specified URL."""
+        # Security: Validate URL before making request
+        self._validate_url(url)
+        
         req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         cache_file = os.path.join(self.cache_dir, 'proxies.html')
 
@@ -36,7 +65,7 @@ class ProxyFetcher:
                     f.write(html_content)
                 logger.info("Successfully fetched proxy list from %s", url)
                 return html_content
-        except (ConnectionError, TimeoutError) as e:
+        except (ConnectionError, TimeoutError, URLError) as e:
             logger.warning("Network error fetching proxy list: %s", e)
             if os.path.exists(cache_file):
                 logger.info("Using cached proxy list due to network error")
@@ -78,6 +107,6 @@ class ProxyFetcher:
 
             logger.info("Successfully parsed %d proxies from HTML", len(proxies))
             return proxies
-        except Exception as e:
+        except (AttributeError, TypeError, ValueError) as e:
             logger.error("Error parsing HTML content: %s", e)
             return []

@@ -3,7 +3,10 @@
 
 """Proxy validator module for testing proxy functionality."""
 
+import asyncio
+import ipaddress
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.request import ProxyHandler, build_opener, install_opener, urlopen
 from urllib.error import URLError, HTTPError
 
@@ -17,11 +20,48 @@ class ProxyValidator:
         self.timeout = timeout
         self.test_url = 'http://ifconfig.co/ip'
 
+    def _validate_proxy_info(self, proxy_info):
+        """Validate proxy IP address and port before testing."""
+        ip_address = proxy_info.get('IP_Address_td')
+        port = proxy_info.get('Port_td')
+        
+        if not ip_address or not port:
+            raise ValueError("Missing IP address or port")
+        
+        # Validate IP address format
+        try:
+            parsed_ip = ipaddress.ip_address(ip_address)
+        except ValueError as e:
+            raise ValueError(f"Invalid IP address format: {ip_address}") from e
+        
+        # Block private, loopback, and reserved addresses to prevent SSRF
+        if parsed_ip.is_private or parsed_ip.is_loopback or parsed_ip.is_reserved:
+            raise ValueError(f"Invalid IP address (private/loopback/reserved): {ip_address}")
+        
+        # Validate port range
+        try:
+            port_num = int(port)
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Invalid port format: {port}") from e
+        
+        if not (1 <= port_num <= 65535):
+            raise ValueError(f"Port out of range (1-65535): {port}")
+        
+        return ip_address, port_num
+
     def validate_proxy(self, proxy_info):
         """Test if a proxy is working."""
-        ip_address = proxy_info['IP_Address_td']
-        port = proxy_info['Port_td']
-        proxy_string = f"{ip_address}:{port}"
+        try:
+            ip_address, port = self._validate_proxy_info(proxy_info)
+            proxy_string = f"{ip_address}:{port}"
+        except ValueError as e:
+            logger.warning("Invalid proxy info: %s", e)
+            return {
+                'valid': False,
+                'proxy': f"{proxy_info.get('IP_Address_td', 'unknown')}:{proxy_info.get('Port_td', 'unknown')}",
+                'error': f'Validation error: {str(e)}',
+                'original_info': proxy_info
+            }
 
         logger.debug("Testing proxy: %s", proxy_string)
 
@@ -64,10 +104,33 @@ class ProxyValidator:
                 'original_info': proxy_info
             }
 
-    def validate_proxy_list(self, proxy_list):
-        """Validate a list of proxies."""
+    def validate_proxy_list(self, proxy_list, max_workers=10):
+        """Validate a list of proxies concurrently for better performance."""
+        if not proxy_list:
+            return []
+        
         results = []
-        for proxy in proxy_list:
-            result = self.validate_proxy(proxy)
-            results.append(result)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all validation tasks
+            future_to_proxy = {
+                executor.submit(self.validate_proxy, proxy): proxy 
+                for proxy in proxy_list
+            }
+            
+            # Collect results as they complete
+            for future in as_completed(future_to_proxy):
+                try:
+                    result = future.result()
+                    results.append(result)
+                except Exception as e:
+                    proxy = future_to_proxy[future]
+                    logger.error("Unexpected error validating proxy %s: %s", 
+                               f"{proxy.get('IP_Address_td', 'unknown')}:{proxy.get('Port_td', 'unknown')}", e)
+                    results.append({
+                        'valid': False,
+                        'proxy': f"{proxy.get('IP_Address_td', 'unknown')}:{proxy.get('Port_td', 'unknown')}",
+                        'error': f'Unexpected error: {str(e)}',
+                        'original_info': proxy
+                    })
+        
         return results
