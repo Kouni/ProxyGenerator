@@ -54,7 +54,7 @@ jobs:
     
     - name: Run security scan
       run: |
-        poetry run safety check
+        poetry run safety scan
         echo "Security scan completed successfully"
     
     - name: Run tests

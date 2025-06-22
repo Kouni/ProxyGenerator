@@ -64,7 +64,7 @@ poetry install
 poetry run pytest --cov=src tests/
 
 # Security scan
-poetry run safety check
+poetry run safety scan
 
 # Code quality
 poetry run pylint src/
