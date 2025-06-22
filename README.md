@@ -19,8 +19,9 @@ curl -O https://kouni.github.io/ProxyGenerator/proxies.json
 
 # Use in Python
 import requests
-proxies = requests.get('https://kouni.github.io/ProxyGenerator/proxies.json').json()
-# Format: [{'IP_Address_td': '1.1.1.1', 'Port_td': '8080', ...}]
+data = requests.get('https://kouni.github.io/ProxyGenerator/proxies.json').json()
+metadata = data['metadata']  # Generated time, count, source info
+proxies = data['proxies']    # List of proxy objects
 ```
 
 ## Implementation
