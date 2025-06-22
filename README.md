@@ -1,6 +1,14 @@
 # ProxyGenerator
 
-HTTP proxy fetcher with automated validation and hourly refresh.
+Secure HTTP proxy fetcher with automated validation, concurrent processing, and hourly refresh.
+
+## Features
+
+- **Security-First**: HTTPS validation with SSL certificate verification and SSRF protection
+- **Input Validation**: IP address and port range validation with private/loopback filtering
+- **Concurrent Processing**: Multi-threaded proxy validation for improved performance
+- **Automated Refresh**: GitHub Actions scheduled execution every hour
+- **Comprehensive Testing**: 78% test coverage with security vulnerability scanning
 
 ## Usage
 
@@ -24,13 +32,47 @@ metadata = data['metadata']  # Generated time, count, source info
 proxies = data['proxies']    # List of proxy objects
 ```
 
-## Implementation
+## Security Features
 
-- Source: free-proxy-list.net
-- Validation: 5s timeout with IP verification
-- Refresh: GitHub Actions hourly
-- Format: JSON with metadata
+- **SSRF Protection**: Trusted host whitelist prevents server-side request forgery
+- **SSL/TLS Validation**: HTTPS-only testing with certificate verification
+- **Input Sanitization**: IP address format validation and private network filtering
+- **Dependency Scanning**: Automated security vulnerability checks in CI/CD
+
+## Architecture
+
+- **Modular Design**: Separated concerns for fetching, validation, and file handling
+- **Concurrent Validation**: ThreadPoolExecutor for parallel proxy testing
+- **Error Handling**: Specific exception types with comprehensive logging
+- **Caching Strategy**: Local cache with fallback for network failures
+
+## Implementation Details
+
+- **Source**: free-proxy-list.net (whitelisted for security)
+- **Validation**: 5s timeout with HTTPS IP verification
+- **Refresh**: GitHub Actions hourly with security scanning
+- **Format**: JSON with metadata and generation timestamps
+- **Performance**: Concurrent validation with configurable worker threads
+
+## Development
+
+```bash
+# Install dependencies
+poetry install
+
+# Run tests with coverage
+poetry run pytest --cov=src tests/
+
+# Security scan
+poetry run safety check
+
+# Code quality
+poetry run pylint src/
+```
 
 ## Requirements
 
-Python 3.13+ | Poetry | beautifulsoup4 | lxml
+- Python 3.13+
+- Poetry package manager
+- Dependencies: beautifulsoup4, lxml, safety (dev)
+- CI/CD: GitHub Actions with security scanning

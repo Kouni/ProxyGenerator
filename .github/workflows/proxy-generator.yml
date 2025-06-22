@@ -52,6 +52,11 @@ jobs:
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: poetry install
     
+    - name: Run security scan
+      run: |
+        poetry run safety check
+        echo "Security scan completed successfully"
+    
     - name: Run tests
       run: |
         export PYTHONPATH="${PYTHONPATH}:src"

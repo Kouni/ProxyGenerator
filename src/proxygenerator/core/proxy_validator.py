@@ -6,8 +6,9 @@
 import asyncio
 import ipaddress
 import logging
+import ssl
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.request import ProxyHandler, build_opener, install_opener, urlopen
+from urllib.request import ProxyHandler, build_opener, install_opener, urlopen, HTTPSHandler
 from urllib.error import URLError, HTTPError
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ class ProxyValidator:
 
     def __init__(self, timeout=5):
         self.timeout = timeout
-        self.test_url = 'http://ifconfig.co/ip'
+        self.test_url = 'https://ifconfig.co/ip'
 
     def _validate_proxy_info(self, proxy_info):
         """Validate proxy IP address and port before testing."""
@@ -65,7 +66,17 @@ class ProxyValidator:
 
         logger.debug("Testing proxy: %s", proxy_string)
 
-        opener = build_opener(ProxyHandler({'http': proxy_string}))
+        # Create SSL context with proper certificate verification
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = True
+        ssl_context.verify_mode = ssl.CERT_REQUIRED
+        
+        # Build opener with both HTTP and HTTPS proxy handlers
+        https_handler = HTTPSHandler(context=ssl_context)
+        opener = build_opener(
+            ProxyHandler({'http': proxy_string, 'https': proxy_string}),
+            https_handler
+        )
         opener.addheaders = [('User-agent', 'Mozilla/5.0')]
         install_opener(opener)
 

@@ -20,6 +20,7 @@ pylint = "^3.3.7"
 isort = "^6.0.1"
 pytest = "^8.4.1"
 pytest-cov = "^6.2.1"
+safety = "^3.5.2"
 
 [build-system]
 requires = ["poetry-core"]
