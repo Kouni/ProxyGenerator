@@ -8,7 +8,7 @@ permissions:
 on:
   schedule:
     # Run every hour at minute 0 (UTC)
-    - cron: '0 * * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch:
     # Allow manual triggering
     inputs:
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       proxy-count: ${{ steps.count.outputs.count }}
-    
+
     steps:
     - name: Workflow trigger info
       run: |
@@ -37,15 +37,15 @@ jobs:
         echo "Current time (UTC): $(date -u)"
         echo "Repository: ${{ github.repository }}"
         echo "Branch: ${{ github.ref_name }}"
-    
+
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.13'
-    
+
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:
@@ -53,18 +53,18 @@ jobs:
         virtualenvs-create: true
         virtualenvs-in-project: true
         installer-parallel: true
-    
+
     - name: Load cached venv
       id: cached-poetry-dependencies
       uses: actions/cache@v4
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-    
+
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: poetry install
-    
+
     - name: Run security scan
       env:
         SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
@@ -77,29 +77,29 @@ jobs:
           echo "y" | poetry run safety scan || echo "Safety scan completed with warnings"
         fi
         echo "Security scan step completed"
-    
+
     - name: Run tests
       run: |
         export PYTHONPATH="${PYTHONPATH}:src"
         poetry run pytest -v
         echo "All tests passed successfully"
-    
+
     - name: Create data directory
       run: mkdir -p data
-    
+
     - name: Run proxy generator
       run: |
         export PYTHONPATH="${PYTHONPATH}:src"
         poetry run proxygenerator
         echo "Proxy generation completed at $(date)"
-    
+
     - name: Check generated data
       id: count
       run: |
         if [ -f "data/proxies.json" ]; then
           echo "Generated proxy data:"
           echo "File size: $(du -h data/proxies.json | cut -f1)"
-          
+
           # Check if new format with metadata exists
           if jq -e '.metadata' data/proxies.json > /dev/null 2>&1; then
             # New format with metadata
@@ -122,7 +122,7 @@ jobs:
           echo "No proxy data generated"
           exit 1
         fi
-    
+
     - name: Upload proxy data
       uses: actions/upload-artifact@v4
       with:
@@ -136,23 +136,23 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
+
     steps:
     - name: Download proxy data
       uses: actions/download-artifact@v4
       with:
         name: proxy-data-${{ github.run_number }}
         path: data
-    
+
     - name: Prepare GitHub Pages
       run: |
         mkdir -p _site
         cp data/proxies.json _site/
-        
+
         # Get current timestamp and proxy count
         CURRENT_TIME=$(date -u "+%Y-%m-%d %H:%M:%S UTC")
         PROXY_COUNT="${{ needs.generate-proxies.outputs.proxy-count }}"
-        
+
         # Create dark mode hacker-style index page
         printf '%s\n' \
           '<!DOCTYPE html>' \
@@ -257,15 +257,15 @@ jobs:
           '  </div>' \
           '</body>' \
           '</html>' > _site/index.html
-    
+
     - name: Setup Pages
       uses: actions/configure-pages@v4
-    
+
     - name: Upload to GitHub Pages
       uses: actions/upload-pages-artifact@v3
       with:
         path: _site
-    
+
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
