@@ -13,7 +13,7 @@ proxygenerator = "src.proxygenerator.main:main"
 [tool.poetry.dependencies]
 python = "^3.13"
 beautifulsoup4 = "^4.13.5"
-lxml = "^6.0.0"
+lxml = "^6.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.3.8"
