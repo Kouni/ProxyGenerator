@@ -18,7 +18,7 @@ lxml = "^6.0.1"
 [tool.poetry.group.dev.dependencies]
 pylint = "^3.3.8"
 isort = "^6.0.1"
-pytest = "^8.4.1"
+pytest = "^8.4.2"
 pytest-cov = "^6.2.1"
 safety = "^3.6.0"
 
