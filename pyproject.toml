@@ -12,7 +12,7 @@ proxygenerator = "src.proxygenerator.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-beautifulsoup4 = "^4.13.4"
+beautifulsoup4 = "^4.13.5"
 lxml = "^6.0.0"
 
 [tool.poetry.group.dev.dependencies]
