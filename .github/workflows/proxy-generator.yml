@@ -148,6 +148,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -171,7 +174,7 @@ jobs:
       run: |
         mkdir -p _site
         cp data/proxies.json _site/
-        poetry run python src/generate_index.py
+        python src/generate_index.py
 
 
     - name: Setup Pages
