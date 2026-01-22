@@ -46,13 +46,16 @@ jobs:
       with:
         python-version: '3.13'
 
-    - name: Install Poetry
+    - name: Install Poetry (1.8.2+)
       uses: snok/install-poetry@v1
       with:
-        version: latest
+        version: "1.8.2"   # minimum version that supports --check
         virtualenvs-create: true
         virtualenvs-in-project: true
         installer-parallel: true
+
+    - name: Show Poetry version
+      run: poetry --version
 
     - name: Check Poetry lockfile sync
       run: |
