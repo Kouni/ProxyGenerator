@@ -148,6 +148,19 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
+    - name: Install Poetry (1.8.2+)
+      uses: snok/install-poetry@v1
+      with:
+        version: "1.8.2"
+        virtualenvs-create: false
+        virtualenvs-in-project: false
+        installer-parallel: true
+
     - name: Download proxy data
       uses: actions/download-artifact@v4
       with:
