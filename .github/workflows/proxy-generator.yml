@@ -54,12 +54,19 @@ jobs:
         virtualenvs-in-project: true
         installer-parallel: true
 
+    - name: Check Poetry lockfile sync
+      run: |
+        # This step ensures pyproject.toml and poetry.lock are always in sync in CI/CD.
+        # If this step fails, run `poetry lock` locally and commit both files.
+        poetry lock --check
+
     - name: Load cached venv
       id: cached-poetry-dependencies
       uses: actions/cache@v4
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
 
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
