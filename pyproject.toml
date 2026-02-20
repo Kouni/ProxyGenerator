@@ -16,7 +16,7 @@ beautifulsoup4 = "^4.14.3"
 lxml = "^6.0.1"
 
 [tool.poetry.group.dev.dependencies]
-pylint = "^4.0.2"
+pylint = "^4.0.5"
 isort = "^7.0.0"
 pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
